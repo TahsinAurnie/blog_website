@@ -39,9 +39,9 @@ class Blog(models.Model):
     slug = models.SlugField(max_length=100, blank=True, null=True)
     banner = models.ImageField(upload_to="blog_banners")
     likes = models.ManyToManyField(User, related_name= 'user_likes', blank=True)
-
     def __str__(self):
         return self.title
+    
     def save(self,*args, **kwargs):
         updating = self.pk is not None
         if updating:

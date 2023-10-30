@@ -8,7 +8,7 @@ class User(AbstractUser):
     profile_image = models.ImageField(null = True, blank = True, upload_to = "profile_images")
     REQUIRED_FIELDS = ["email"]
     object = CustomUserManager()
-    followers = models.ManyToManyField("Follow")  # returning string from Follow class
+    followers = models.ManyToManyField("Follow")  # returning string from Follow class to here
 
     def __str__(self):
         return self.username

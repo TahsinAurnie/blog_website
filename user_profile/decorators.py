@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 
 def not_login_required(view_function):
     def wrapper(request, *args, **kwargs):
