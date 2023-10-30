@@ -8,14 +8,14 @@ from notifications.models import Notification
 def blog_created_nf(instance, created, *args, **kwargs):
     if created:
         followers = instance.user.followers.all()
-        for instance in followers:
-            follower = instance.followed_by
-            if not instance.muted:
+        for data in followers:
+            follower = data.followed_by
+            if not data.muted:
                 Notification.objects.create(
                     content_object = instance, 
                     user = follower,
                     text = f"{instance.user.username} posted a new blog.",
-                    notification_type = 'Blog'
+                    notification_types = 'Blog'
                     )
 
 @receiver(post_save, sender = Follow)
@@ -26,12 +26,12 @@ def blog_followed_nf(instance, created, *args, **kwargs):
             Notification.objects.create(
                 content_object = instance, 
                 user = followed,
-                text = f"{instance.followed_by.username} started following {instance.followed.username}.",
-                notification_type = 'Follow'
+                text = f"{instance.followed_by.username} started following you.",
+                notification_types = 'Follow'
                 )
 
 @receiver(m2m_changed, sender = Blog.likes.through)
-def blog_liked_nf(instance, pk_set, action, created, *args, **kwargs):
+def blog_liked_nf(instance, pk_set, action, *args, **kwargs):
     pk = list(pk_set)[0]   # 1st index has the user_id
     user = User.objects.get(id=pk)
     if action == "post_add":
@@ -39,5 +39,5 @@ def blog_liked_nf(instance, pk_set, action, created, *args, **kwargs):
             content_object = instance, 
             user = instance.user,
             text = f"{user.username} liked your blog.",
-            notification_type = 'Like'
+            notification_types = 'Like'
             )

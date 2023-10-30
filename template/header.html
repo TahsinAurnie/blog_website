@@ -34,7 +34,13 @@
               aria-haspopup="true" aria-expanded="false">{{request.user.username}}</a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <a class="dropdown-item" href="{% url 'profile' %}">My profile</a>
-              <a class="dropdown-item" href="#">Notifications</a>
+              <a class="dropdown-item" href="{% url 'user_notifications' %}">
+                {% if unseen > 0 %}
+                Notification ({{unseen}})
+                {% else %}
+                Notification
+                {% endif %}
+              </a>
               <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
             </div>
           </li>

@@ -1084,7 +1084,7 @@ footer p a:hover {
 		/* left: 50%; */
 		/* top: 50%; */
 		/* bottom: auto; */
-		transform: translate(-50%,-50%);
+		/* transform: translate(-50%,-50%); */
 	}
 	.owl-banner .item .item-content h4 {
 		font-size: 24px;

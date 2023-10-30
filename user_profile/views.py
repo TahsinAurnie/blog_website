@@ -6,6 +6,7 @@ from django.views.decorators.cache import never_cache
 from .models import *
 from .forms import *
 from .decorators import *
+from notifications.models import Notification
 
 # Create your views here.
 @never_cache
@@ -112,3 +113,14 @@ def follow_or_unfollow_user(request, user_id):
         followed.followers.remove(follow)
         follow.delete()
     return redirect('view_user_info', username = followed.username)
+
+@login_required(login_url='login')
+def user_notifications(request):
+    notifications = Notification.objects.filter(
+        user = request.user,
+        is_seen = False
+    )
+    for nf in notifications:
+        nf.is_seen = True
+        nf.save()
+    return render(request, 'notifications.html')
