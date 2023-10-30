@@ -34,13 +34,14 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
+    'django.contrib.contenttypes',  # collection all models in my app which gives access by generic foreignkey to all models 
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'blog',
     'user_profile',
-    'ckeditor'
+    'ckeditor',
+    'notifications',
 ]
 
 MIDDLEWARE = [
