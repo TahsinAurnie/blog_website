@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Blog Details {% endblock title%}
+
+{% block content %}
+<section class="blog-posts grid-system">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8">
+        <h4 class="text-center">{{total}} {% if blogs.count == 1%} result {% else %} results {%endif%} found for "{{search_key}}"</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="all-blog-posts">
+          <div class="row">
+            {% for blog in blogs %}
+            {% include "blog_card.html" %}
+            {% endfor %}
+
+            <div class="col-lg-12">
+              <ul class="page-numbers">
+                {% if blogs.has_previous %}
+                <li><a href="?search={{search_key}}&page={{blogs.previous_page_number}}"><i class="fa fa-angle-double-left"></i></a></li>
+                {% endif %}
+                {% for page in blogs.paginator.page_range %}
+                <!-- to make active the current page  -->
+                {% if page == blogs.number %}
+                <li class="active"><a href="?search={{search_key}}&page={{page}}">{{page}}</a></li>
+                {% else %}
+                <li><a href="?search={{search_key}}&page={{page}}">{{page}}</a></li>
+                {% endif %}
+                {% endfor %}
+                {% if blogs.has_next %}
+                <li><a href="?search={{search_key}}&page={{blogs.next_page_number}}"><i class="fa fa-angle-double-right"></i></a></li>
+                {% endif %}
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      {%include 'sidebar.html' with blogs=recent_blogs %}
+    </div>
+  </div>
+</section>
+{% endblock %}
