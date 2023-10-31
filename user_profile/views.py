@@ -154,12 +154,7 @@ def user_notifications(request):
 def mute_or_unmute_user(request, user_id):      # kake ami mute korte chacci tar user_id
     user = get_object_or_404(User, pk = user_id)
     follower = get_object_or_404(User, pk = request.user.pk)
-
-    instance = get_object_or_404(
-        Follow,
-        followed = user, 
-        followed_by = follower
-        )
+    instance = get_object_or_404(Follow, followed = user, followed_by = follower)
     if instance.muted:   
         instance.muted = False
         instance.save()

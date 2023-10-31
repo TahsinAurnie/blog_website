@@ -139,3 +139,8 @@ MEDIA_ROOT = BASE_DIR / 'mediafiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'user_profile.User'
+
+AUTHENTICATION_BACKENDS = (
+    'user_profile.backends.EmailAuthBackend',   # custom auth backend
+    'django.contrib.auth.backends.ModelBackend' # django default backend activates when username is used 
+)
