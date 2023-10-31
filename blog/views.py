@@ -211,9 +211,9 @@ def add_blog(request):
     form = AddBlogForm()
 
     if request.method == "POST":
-        form = AddBlogForm(request.POST, request.FILES) 
+        form = AddBlogForm(request.POST, request.FILES)
         if form.is_valid():
-            tags = request.POST['tags'].split(',')
+            tags = request.POST['tag'].split(',')
             user = get_object_or_404(User, pk=request.user.pk)
             category = get_object_or_404(Category, pk=request.POST['category'])
             blog = form.save(commit=False)
@@ -223,21 +223,22 @@ def add_blog(request):
 
             for tag in tags:
                 tag_input = Tag.objects.filter(
-                    title__iexact = tag.strip(),
-                    slug = slugify(tag.strip())
+                    title__iexact=tag.strip(),
+                    slug=slugify(tag.strip())
                 )
                 if tag_input.exists():
                     t = tag_input.first()
                     blog.tag.add(t)
+
                 else:
                     if tag != '':
                         new_tag = Tag.objects.create(
-                            title = tag.strip(),
-                            slug = slugify(tag.strip())
+                            title=tag.strip(),
+                            slug=slugify(tag.strip())
                         )
                         blog.tag.add(new_tag)
 
-            messages.success(request, "Blog added to this profile successfully")
+            messages.success(request, "Blog added successfully")
             return redirect('blog_details', slug=blog.slug)
         else:
             print(form.errors)
@@ -248,42 +249,48 @@ def add_blog(request):
     return render(request, 'add_blog.html', context)
 
 @login_required(login_url='login')
-def update_blog(request,slug):
-    blog = get_object_or_404(Blog, slug=slug)        # from Blog class => slug
+def update_blog(request, slug):
+    blog = get_object_or_404(Blog, slug=slug)
     form = AddBlogForm(instance=blog)
 
     if request.method == "POST":
-        form = AddBlogForm(request.POST, request.FILES, instance=blog) 
+        form = AddBlogForm(request.POST, request.FILES, instance=blog)
+        
         if form.is_valid():
+            
             if request.user.pk != blog.user.pk:
                 return redirect('home')
-            tags = request.POST['tags'].split(',')
+
+            tags = request.POST['tag'].split(',')
             user = get_object_or_404(User, pk=request.user.pk)
             category = get_object_or_404(Category, pk=request.POST['category'])
             blog = form.save(commit=False)
             blog.user = user
             blog.category = category
             blog.save()
+
             for tag in tags:
                 tag_input = Tag.objects.filter(
-                    title__iexact = tag.strip(),
-                    slug = slugify(tag.strip())
+                    title__iexact=tag.strip(),
+                    slug=slugify(tag.strip())
                 )
                 if tag_input.exists():
                     t = tag_input.first()
                     blog.tag.add(t)
+
                 else:
                     if tag != '':
                         new_tag = Tag.objects.create(
-                            title = tag.strip(),
-                            slug = slugify(tag.strip())
-                    )
-                    blog.tag.add(new_tag)
+                            title=tag.strip(),
+                            slug=slugify(tag.strip())
+                        )
+                        blog.tag.add(new_tag)
 
             messages.success(request, "Blog updated successfully")
             return redirect('blog_details', slug=blog.slug)
         else:
-            print(form.instance.errors)
+            print(form.errors)
+
 
     context = {
         "form": form,

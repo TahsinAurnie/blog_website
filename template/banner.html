@@ -12,13 +12,13 @@
             <div class="meta-category">
               <span>{{blog.category}}</span>
             </div>
-            <a href="#">
+            <a href="{% url 'blog_details' blog.slug %}">
               <h4>{{blog.title}}</h4>
             </a>
             <ul class="post-info">
-              <li><a href="#">{{blog.user.username}}</a></li>
-              <li><a href="#">{{blog.created_date}}</a></li>
-              <li><a href="#">{{blog.blog_comment.all.count}} Comments</a></li>
+              <li><a href="{% url 'view_user_info' blog.user.username %}">{{blog.user.username}}</a></li>
+              <li><a href="javascript:void(0);">{{blog.created_date}}</a></li>
+              <!-- <li><a href="#">{{blog.blog_comment.all.count}} Comments</a></li> -->
             </ul>
           </div>
         </div>
