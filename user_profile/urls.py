@@ -10,4 +10,5 @@ urlpatterns =[
     path('view_user_info/<str:username>/', view_user_info, name='view_user_info'),
     path('follow_or_unfollow/<int:user_id>/', follow_or_unfollow_user, name='follow_or_unfollow_user'),
     path('user_notifications/',user_notifications, name='user_notifications'),
+    path('mute_or_unmute_user/<int:user_id>/',mute_or_unmute_user, name='mute_or_unmute_user'),
 ]

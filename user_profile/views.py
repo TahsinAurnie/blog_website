@@ -84,19 +84,44 @@ def change_profile_picture(request):
     return redirect('profile')
 
 def view_user_info(request, username):
+    # Get the user account based on the provided username, or return a 404 error if not found
     account = get_object_or_404(User, username = username)
-    following = False
 
+    # Initialize variables for following and muted
+    following = False
+    muted = None
+    
+    # Check if the request is coming from an authenticated user
     if request.user.is_authenticated:
-        if request.user.id == account.id:
-            return redirect('profile')
-        followers = account.followers.filter(followed_by__id = request.user.id)
-        if followers.exists():
-            following = True
+        # Check if the requested user is the same as the logged-in user
+        if request.user.id == account.id:   
+            # Redirect to the user's own profile      
+            return redirect('profile')   
+
+        # Fetch the "followers for the 'account' user" that are "followed by the current logged-in user (request)"    
+        # user 'account' ke current logged-in user follow korse se onusare followers(current user) list filter 
+        followers = account.followers.filter(
+            followed_by__id = request.user.id     
+            )
+        # Check if any followers exist for this relationship
+        if followers.exists(): 
+             # Set 'following' to True if the current user follows the 'account' user       
+            following = True                     
+    
+    # If the current user is following the 'account' user, further actions are taken
+    if following:              
+        # Retrieve the first follower in the queryset                   
+        queryset = followers.first()    
+        # Check if the follower is muted the account he's following, then he will not get any notification        
+        if queryset.muted:
+            muted = True
+        else:
+            muted = False
 
     context = {
         "account": account,
-        "following": following
+        "following": following,
+        "muted": muted
     }
     return render(request, 'user_info.html', context)
 
@@ -124,3 +149,21 @@ def user_notifications(request):
         nf.is_seen = True
         nf.save()
     return render(request, 'notifications.html')
+
+@login_required(login_url='login')
+def mute_or_unmute_user(request, user_id):      # kake ami mute korte chacci tar user_id
+    user = get_object_or_404(User, pk = user_id)
+    follower = get_object_or_404(User, pk = request.user.pk)
+
+    instance = get_object_or_404(
+        Follow,
+        followed = user, 
+        followed_by = follower
+        )
+    if instance.muted:   
+        instance.muted = False
+        instance.save()
+    else:
+        instance.muted = True
+        instance.save()
+    return redirect('view_user_info', username = user.username)

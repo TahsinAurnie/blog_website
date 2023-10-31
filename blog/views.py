@@ -209,6 +209,7 @@ def my_blogs(request):
 @login_required(login_url='login')
 def add_blog(request):
     form = AddBlogForm()
+
     if request.method == "POST":
         form = AddBlogForm(request.POST, request.FILES) 
         if form.is_valid():
@@ -219,6 +220,7 @@ def add_blog(request):
             blog.user = user
             blog.category = category
             blog.save()
+
             for tag in tags:
                 tag_input = Tag.objects.filter(
                     title__iexact = tag.strip(),
@@ -232,8 +234,8 @@ def add_blog(request):
                         new_tag = Tag.objects.create(
                             title = tag.strip(),
                             slug = slugify(tag.strip())
-                    )
-                    blog.tag.add(new_tag)
+                        )
+                        blog.tag.add(new_tag)
 
             messages.success(request, "Blog added to this profile successfully")
             return redirect('blog_details', slug=blog.slug)

@@ -23,6 +23,11 @@
                             <li class="py-2">
                                 {% if following %}
                                 <a class="btn btn-primary text-decoration-none" href="{% url 'follow_or_unfollow_user' account.id %}">Unfollow</a>
+                                {% if muted %}
+                                <a class="btn btn-primary text-decoration-none" href="{% url 'mute_or_unmute_user' account.id %}">Unmute</a>
+                                {% else %}
+                                <a class="btn btn-primary text-decoration-none" href="{% url 'mute_or_unmute_user' account.id %}">Mute</a>
+                                {% endif %}
                                 {% else %}
                                 <a class="btn btn-primary text-decoration-none" href="{% url 'follow_or_unfollow_user' account.id %}">Follow</a>
                                 {% endif %}
