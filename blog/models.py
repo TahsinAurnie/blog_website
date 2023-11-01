@@ -57,6 +57,7 @@ class Comment(models.Model):
     blog = models.ForeignKey(Blog, related_name="blog_comment", on_delete=models.CASCADE)
     text = models.TextField()
     created_date = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.text
@@ -69,6 +70,7 @@ class Reply(models.Model):
     comment = models.ForeignKey(Comment, related_name="comment_replies", on_delete=models.CASCADE)
     text = models.TextField()
     created_date = models.DateField(auto_now_add=True)
+    is_active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.text

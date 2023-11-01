@@ -96,7 +96,7 @@
                 <div class="content">
                   <!-- Shows all comments in serial got from the comment form (class defined) -->
                   <ul class="d-flex flex-column">
-                    {% for comment in blog.blog_comment.all %}
+                    {% for comment in comments %}
                     <li>
                       <div class="author-thumb">
                         <img src="{{comment.user.get_profile_picture}}" alt="" style="width: 100px;height: 100px;">

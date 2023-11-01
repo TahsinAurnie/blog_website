@@ -97,28 +97,43 @@ def blog_details(request, slug):
     category = Category.objects.get(id = blog.category.id)
     related_blogs = category.category_blogs.all()
     liked_by = request.user in blog.likes.all()
+    comments = blog.blog_comment.filter(is_active=True)
 
     if request.method == "POST" and request.user.is_authenticated:
         form = TextForm(request.POST)
         if form.is_valid():
-            Comment.objects.create(
-                user=request.user,
-                blog=blog,
-                text=form.cleaned_data.get('text')
-            )
+            if request.user.is_superuser and request.user.is_staff:
+                Comment.objects.create(
+                    user=request.user,
+                    blog=blog,
+                    text=form.cleaned_data.get('text'),
+                    is_active = True
+                )
+                return redirect('blog_details', slug=slug)
+            else:
+                Comment.objects.create(
+                    user=request.user,
+                    blog=blog,
+                    text=form.cleaned_data.get('text'),
+                    is_active = False
+                )
+                messages.success(request, "Keep patience for admin approval")
             return redirect('blog_details', slug=slug)
+
     context = {
         "blog": blog,
         "related_blogs": related_blogs,
         "tags": tags,
         "form": form,
-        "liked_by": liked_by
+        "liked_by": liked_by,
+        "comments": comments
     }
     return render(request, 'blog_details.html', context)
 
 @login_required(login_url='login')
 def add_reply(request, blog_id, comment_id):
     blog = get_object_or_404(Blog, id=blog_id)
+
     if request.method == "POST" and request.user.is_authenticated:
         form = TextForm(request.POST)
         if form.is_valid():
