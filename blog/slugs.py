@@ -11,7 +11,7 @@ def generate_unique_slug(instance, base_title, new_slug=False, update=False): # 
     if update:                             # if any blog related obj is updated
         slug_exists = model.objects.filter(    
         slug__icontains = slug             
-    ).exclude(pk=instance.pk)              # exclude blog id and see if any other entry in that slug of title exists
+    ).exclude(pk=instance.pk)              # exclude that blog id if any other entry with that slug of title exists
     else:
         slug_exists = model.objects.filter(    
         slug__icontains = slug             # checking if the slug already exists

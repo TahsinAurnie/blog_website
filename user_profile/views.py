@@ -1,8 +1,11 @@
+import uuid
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+from django.core.mail import send_mail
+from django.conf import settings
 from .models import *
 from .forms import *
 from .decorators import *
@@ -23,9 +26,11 @@ def login_user(request):
                 username = form.cleaned_data.get('username'),
                 password = form.cleaned_data.get('password')
             )
-            if user:
+            if user and user.is_verified:
                 login(request, user)
                 return redirect('home')
+            elif user and not user.is_verified:
+                messages.info(request, 'Please verify your mail first')
             else:
                 messages.warning(request, 'Wrong credentials')
     return render(request, 'login.html', context)
@@ -33,6 +38,14 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     return redirect('login')
+
+
+def send_email_after_reg(username, email, token):
+    subject = "Verify Email"
+    message = f'Hi {username}, Click on the link to verify your account http://127.0.0.1:8000/account_verify/{token}/'
+    from_email = settings.EMAIL_HOST_USER
+    recipient_list = [email, ]
+    send_mail(subject=subject, message=message, from_email=from_email, recipient_list= recipient_list)
 
 @never_cache
 @not_login_required
@@ -43,13 +56,27 @@ def register_user(request):
         if form.is_valid():
             user = form.save(commit=False)         # initially form is not saved as pw needs to be hashed
             user.set_password(form.cleaned_data.get('password'))
+            uid = uuid.uuid4()
+            user.token = str(uid)
             user.save()
-            messages.success(request, "Registration successful")
-            return redirect('login')
+            send_email_after_reg(user.username, user.email, uid)
+            messages.success(request, "Your registration was successful. Please check your mail to verify your account.")
+
+            return redirect('register_user')
     context= {
         "form": form
     }
     return render(request, 'registration.html', context)
+
+@never_cache
+@not_login_required
+def account_verify(request, token):
+    pf = User.objects.filter(token=token).first()
+    pf.is_verified =True
+    pf.save()
+    messages.success(request, "Your account is verified. You can login in to your account now.")
+    return redirect('login')
+
 
 @login_required(login_url='login')
 def profile(request):

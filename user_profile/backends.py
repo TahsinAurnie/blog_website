@@ -5,8 +5,8 @@ from .models import User
 class EmailAuthBackend(ModelBackend):
     def authenticate(self, request, username: None, password: None, **kwargs):
         try:
-            user = User.objects.get(email = username)    # checking with field element get from form whether it has got email
-            if user.check_password(password):
+            user = User.objects.get(email = username)  # checking if the field "username" get email in login form that matches that user's email
+            if user.check_password(password):           
                 return user
             else: 
                 return None

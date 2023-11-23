@@ -8,5 +8,6 @@ admin.site.register(Tag)
 @admin.register(Blog)
 class BlogAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'title')
+    
 admin.site.register(Comment)
 admin.site.register(Reply)

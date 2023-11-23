@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
 from django.utils.text import slugify
+from better_profanity import profanity
 from .models import(
     User,
     Blog,
@@ -106,7 +107,7 @@ def blog_details(request, slug):
                 Comment.objects.create(
                     user=request.user,
                     blog=blog,
-                    text=form.cleaned_data.get('text'),
+                    text=profanity.censor(form.cleaned_data.get('text')),
                     is_active = True
                 )
                 return redirect('blog_details', slug=slug)
@@ -114,7 +115,7 @@ def blog_details(request, slug):
                 Comment.objects.create(
                     user=request.user,
                     blog=blog,
-                    text=form.cleaned_data.get('text'),
+                    text=profanity.censor(form.cleaned_data.get('text')),
                     is_active = False
                 )
                 messages.success(request, "Keep patience for admin approval")

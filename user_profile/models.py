@@ -8,7 +8,9 @@ class User(AbstractUser):
     profile_image = models.ImageField(null = True, blank = True, upload_to = "profile_images")
     REQUIRED_FIELDS = ["email"]
     object = CustomUserManager()
-    followers = models.ManyToManyField("Follow")  # returning string from Follow class to here
+    followers = models.ManyToManyField("Follow", blank = True)  # returning string from Follow class to here
+    token = models.CharField(max_length=150, null = True, blank = True)
+    is_verified = models.BooleanField(default = False)
 
     def __str__(self):
         return self.username

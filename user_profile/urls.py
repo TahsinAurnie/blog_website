@@ -5,6 +5,7 @@ urlpatterns =[
     path('login/', login_user, name='login'),
     path('logout/', logout_user, name='logout'),
     path('register_user/', register_user, name='register_user'),
+    path('account_verify/<slug:token>/', account_verify, name='account_verify'),
     path('profile/', profile, name='profile'),
     path('profile_picture/', change_profile_picture, name='profile_picture'),
     path('view_user_info/<str:username>/', view_user_info, name='view_user_info'),
