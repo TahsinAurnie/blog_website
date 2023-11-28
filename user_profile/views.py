@@ -9,13 +9,18 @@ from django.conf import settings
 from .models import *
 from .forms import *
 from .decorators import *
+from allauth.account.models import (
+    EmailAddress,
+)
 from notifications.models import Notification
+
 
 # Create your views here.
 @never_cache
 @not_login_required
 def login_user(request):
     form = LoginForm()
+
     context = {
         "form": form
     }
@@ -23,8 +28,8 @@ def login_user(request):
         form = LoginForm(request.POST)
         if form.is_valid():
             user = authenticate(
-                username = form.cleaned_data.get('username'),
-                password = form.cleaned_data.get('password')
+                username=form.cleaned_data.get('username'),
+                password=form.cleaned_data.get('password')
             )
             if user and user.is_verified:
                 login(request, user)
@@ -35,6 +40,7 @@ def login_user(request):
                 messages.warning(request, 'Wrong credentials')
     return render(request, 'login.html', context)
 
+
 def logout_user(request):
     logout(request)
     return redirect('login')
@@ -42,10 +48,11 @@ def logout_user(request):
 
 def send_email_after_reg(username, email, token):
     subject = "Verify Email"
-    message = f'Hi {username}, Click on the link to verify your account http://127.0.0.1:8000/account_verify/{token}/'
+    message = 'Hi {}, Click on the link to verify your account http://127.0.0.1:8000/account_verify/{}/'.format(username, token)
     from_email = settings.EMAIL_HOST_USER
     recipient_list = [email, ]
-    send_mail(subject=subject, message=message, from_email=from_email, recipient_list= recipient_list)
+    send_mail(subject=subject, message=message, from_email=from_email, recipient_list=recipient_list)
+
 
 @never_cache
 @not_login_required
@@ -54,25 +61,27 @@ def register_user(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)         # initially form is not saved as pw needs to be hashed
+            user = form.save(commit=False)  # initially form is not saved as pw needs to be hashed
             user.set_password(form.cleaned_data.get('password'))
             uid = uuid.uuid4()
             user.token = str(uid)
             user.save()
             send_email_after_reg(user.username, user.email, uid)
-            messages.success(request, "Your registration was successful. Please check your mail to verify your account.")
+            messages.success(request,
+                             "Your registration was successful. Please check your mail to verify your account.")
 
             return redirect('register_user')
-    context= {
+    context = {
         "form": form
     }
     return render(request, 'registration.html', context)
+
 
 @never_cache
 @not_login_required
 def account_verify(request, token):
     pf = User.objects.filter(token=token).first()
-    pf.is_verified =True
+    pf.is_verified = True
     pf.save()
     messages.success(request, "Your account is verified. You can login in to your account now.")
     return redirect('login')
@@ -81,11 +90,11 @@ def account_verify(request, token):
 @login_required(login_url='login')
 def profile(request):
     account = get_object_or_404(User, pk=request.user.pk)
-    form = ProfileUpdateForm(instance = account)
+    form = ProfileUpdateForm(instance=account)
     if request.method == "POST":
         if request.user.pk != account.pk:
             return redirect('home')
-        form = ProfileUpdateForm(request.POST, instance = account)
+        form = ProfileUpdateForm(request.POST, instance=account)
         if form.is_valid():
             form.save()
             messages.success(request, "Profile has been updated successfully.")
@@ -96,13 +105,14 @@ def profile(request):
     }
     return render(request, 'profile.html', context)
 
+
 @login_required(login_url='login')
 def change_profile_picture(request):
     if request.method == 'POST':
         form = ProfilePictureUpdateForm(request.POST, request.FILES)
         if form.is_valid():
             img = request.FILES['profile_picture']
-            user = get_object_or_404(User, pk = request.user.pk)
+            user = get_object_or_404(User, pk=request.user.pk)
             if request.user.pk != user.pk:
                 return redirect('home')
             user.profile_image = img
@@ -110,35 +120,36 @@ def change_profile_picture(request):
             messages.success(request, "Profile picture has been updated successfully.")
     return redirect('profile')
 
+
 def view_user_info(request, username):
     # Get the user account based on the provided username, or return a 404 error if not found
-    account = get_object_or_404(User, username = username)
+    account = get_object_or_404(User, username=username)
 
     # Initialize variables for following and muted
     following = False
     muted = None
-    
+
     # Check if the request is coming from an authenticated user
     if request.user.is_authenticated:
         # Check if the requested user is the same as the logged-in user
-        if request.user.id == account.id:   
+        if request.user.id == account.id:
             # Redirect to the user's own profile      
-            return redirect('profile')   
+            return redirect('profile')
 
-        # Fetch the "followers for the 'account' user" that are "followed by the current logged-in user (request)"    
+            # Fetch the "followers for the 'account' user" that are "followed by the current logged-in user (request)"
         # user 'account' ke current logged-in user follow korse se onusare followers(current user) list filter 
         followers = account.followers.filter(
-            followed_by__id = request.user.id     
-            )
+            followed_by__id=request.user.id
+        )
         # Check if any followers exist for this relationship
-        if followers.exists(): 
-             # Set 'following' to True if the current user follows the 'account' user       
-            following = True                     
-    
-    # If the current user is following the 'account' user, further actions are taken
-    if following:              
+        if followers.exists():
+            # Set 'following' to True if the current user follows the 'account' user
+            following = True
+
+            # If the current user is following the 'account' user, further actions are taken
+    if following:
         # Retrieve the first follower in the queryset                   
-        queryset = followers.first()    
+        queryset = followers.first()
         # Check if the follower is muted the account he's following, then he will not get any notification        
         if queryset.muted:
             muted = True
@@ -152,40 +163,43 @@ def view_user_info(request, username):
     }
     return render(request, 'user_info.html', context)
 
+
 @login_required(login_url='login')
 def follow_or_unfollow_user(request, user_id):
-    followed = get_object_or_404(User, id = user_id)
-    followed_by = get_object_or_404(User, id = request.user.id)
+    followed = get_object_or_404(User, id=user_id)
+    followed_by = get_object_or_404(User, id=request.user.id)
 
     # if there is a instance in Follow class of these id(s) then already following, otherwise not
     follow, created = Follow.objects.get_or_create(followed=followed, followed_by=followed_by)
-    if created:   # relation built i.e follow instance
+    if created:  # relation built i.e follow instance
         followed.followers.add(follow)
     else:
         followed.followers.remove(follow)
         follow.delete()
-    return redirect('view_user_info', username = followed.username)
+    return redirect('view_user_info', username=followed.username)
+
 
 @login_required(login_url='login')
 def user_notifications(request):
     notifications = Notification.objects.filter(
-        user = request.user,
-        is_seen = False
+        user=request.user,
+        is_seen=False
     )
     for nf in notifications:
         nf.is_seen = True
         nf.save()
     return render(request, 'notifications.html')
 
+
 @login_required(login_url='login')
-def mute_or_unmute_user(request, user_id):      # kake ami mute korte chacci tar user_id
-    user = get_object_or_404(User, pk = user_id)
-    follower = get_object_or_404(User, pk = request.user.pk)
-    instance = get_object_or_404(Follow, followed = user, followed_by = follower)
-    if instance.muted:   
+def mute_or_unmute_user(request, user_id):  # kake ami mute korte chacci tar user_id
+    user = get_object_or_404(User, pk=user_id)
+    follower = get_object_or_404(User, pk=request.user.pk)
+    instance = get_object_or_404(Follow, followed=user, followed_by=follower)
+    if instance.muted:
         instance.muted = False
         instance.save()
     else:
         instance.muted = True
         instance.save()
-    return redirect('view_user_info', username = user.username)
+    return redirect('view_user_info', username=user.username)

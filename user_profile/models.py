@@ -31,3 +31,4 @@ class Follow(models.Model):
 
     def __str__(self) -> str:
         return f"{self.followed_by.username} started following {self.followed.username}."
+

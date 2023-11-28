@@ -45,9 +45,9 @@ class Blog(models.Model):
     def save(self,*args, **kwargs):
         updating = self.pk is not None
         if updating:
+            # self.slug = slugify(self.title)
             self.slug = generate_unique_slug(self, self.title, update=True)
             super().save(*args, **kwargs)
-            # self.slug = slugify(self.title)
         else:
             self.slug = generate_unique_slug(self, self.title)
             super().save(*args, **kwargs)
